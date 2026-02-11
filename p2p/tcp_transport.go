@@ -73,11 +73,12 @@ func (t *TCPTransport) handleConn(conn net.Conn) {
 		fmt.Printf("TCP handshake error: %s\n", err)
 		return
 	}
-	msg := &Temp{}
+	msg := &Message{}
 	for {
 		if err := t.Decoder.Decode(conn, msg); err != nil {
 			fmt.Printf("TCP error: %s\n", err)
 			continue
 		}
+		fmt.Printf("message: %s\n", msg)
 	}
 }
