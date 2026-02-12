@@ -23,3 +23,5 @@ bin/
 
 # Dependency directories
 vendor/
+
+somekey/
