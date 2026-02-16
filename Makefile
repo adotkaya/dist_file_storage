@@ -1,4 +1,4 @@
-build:
+bbuild:
 	@go build -o bin/fs
 
 run: build
