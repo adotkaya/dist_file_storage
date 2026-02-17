@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
 	"strings"
@@ -21,7 +22,7 @@ func CASPathTransformFunc(key string) PathKey {
 	paths := make([]string, sliceLen)
 
 	for i := 0; i < sliceLen; i++ {
-		from, to := i*blocksize, (i*blocksize + blocksize)
+		from, to := i*blocksize, i*blocksize+blocksize
 		paths[i] = hashStr[from:to]
 	}
 	return PathKey{
@@ -58,6 +59,23 @@ func NewStore(opts StoreOpts) *Store {
 	}
 }
 
+func (s *Store) Has(key string) bool {
+	pathKey := s.PathTransformFunc(key)
+	_, err := os.Stat(pathKey.FullPath())
+	if err == fs.ErrExist {
+		return true
+	}
+	return false
+}
+
+func (s *Store) Delete(key string) error {
+	pathKey := s.PathTransformFunc(key)
+	defer func() {
+		log.Printf("deleted [%s]", pathKey.Filename)
+	}()
+	return os.RemoveAll(pathKey.FullPath())
+}
+
 func (s *Store) Read(key string) (io.Reader, error) {
 	r, err := s.readStream(key)
 	if err != nil {
@@ -84,6 +102,13 @@ func (s *Store) writeStream(key string, r io.Reader) error {
 	fullPath := pathKey.FullPath()
 
 	f, err := os.Create(fullPath)
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Printf("error closing file: %s", err)
+		}
+	}(f)
+
 	if err != nil {
 		return err
 	}
@@ -93,6 +118,5 @@ func (s *Store) writeStream(key string, r io.Reader) error {
 	}
 
 	log.Printf("written (%d) bytes to disk: %s", n, fullPath)
-
 	return nil
 }

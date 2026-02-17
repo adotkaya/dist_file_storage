@@ -40,3 +40,18 @@ func TestStore(t *testing.T) {
 		t.Errorf("have %s, want %s", data, b)
 	}
 }
+
+func TestStore_Delete(t *testing.T) {
+	s := NewStore(StoreOpts{
+		PathTransformFunc: CASPathTransformFunc,
+	})
+	key := "specials"
+	data := []byte("some data")
+
+	if err := s.writeStream(key, bytes.NewReader(data)); err != nil {
+		t.Error(err)
+	}
+	if err := s.Delete(key); err != nil {
+		t.Error(err)
+	}
+}
