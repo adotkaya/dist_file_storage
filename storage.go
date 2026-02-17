@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -62,10 +63,19 @@ func NewStore(opts StoreOpts) *Store {
 func (s *Store) Has(key string) bool {
 	pathKey := s.PathTransformFunc(key)
 	_, err := os.Stat(pathKey.FullPath())
-	if err == fs.ErrExist {
+	if errors.Is(err, fs.ErrExist) {
 		return true
 	}
 	return false
+}
+
+func (p PathKey) RemoveDirectory() string {
+	paths := strings.Split(p.Pathname, "/")
+	if len(paths) == 0 {
+		return ""
+	}
+	return paths[0]
+
 }
 
 func (s *Store) Delete(key string) error {
@@ -73,7 +83,7 @@ func (s *Store) Delete(key string) error {
 	defer func() {
 		log.Printf("deleted [%s]", pathKey.Filename)
 	}()
-	return os.RemoveAll(pathKey.FullPath())
+	return os.RemoveAll(pathKey.RemoveDirectory())
 }
 
 func (s *Store) Read(key string) (io.Reader, error) {
