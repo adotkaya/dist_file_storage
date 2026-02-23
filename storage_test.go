@@ -24,21 +24,25 @@ func TestStore(t *testing.T) {
 	opts := StoreOpts{PathTransformFunc: CASPathTransformFunc}
 	s := NewStore(opts)
 	key := "specials"
-
 	data := []byte("some data")
+
 	if err := s.writeStream(key, bytes.NewReader(data)); err != nil {
 		t.Error(err)
 	}
 
 	r, err := s.Read(key)
+
 	if err != nil {
 		t.Error(err)
 	}
+
 	b, _ := io.ReadAll(r)
 	fmt.Println(string(b))
+
 	if string(b) != string(data) {
 		t.Errorf("have %s, want %s", data, b)
 	}
+	s.Delete(key)
 }
 
 func TestStore_Delete(t *testing.T) {

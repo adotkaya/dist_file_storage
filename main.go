@@ -7,7 +7,6 @@ import (
 )
 
 func OnPeer(peer p2p.Peer) error {
-	fmt.Errorf("failed the onpeer func")
 	return nil
 }
 func main() {
