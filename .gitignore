@@ -26,3 +26,7 @@ vendor/
 
 somekey/
 /f16b0/
+
+
+.zed
+__debug_bin.exe

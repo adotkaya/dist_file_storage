@@ -75,7 +75,8 @@ func NewStore(opts StoreOpts) *Store {
 
 func (s *Store) Has(key string) bool {
 	pathKey := s.PathTransformFunc(key)
-	_, err := os.Stat(pathKey.FullPath())
+	fullPathWithRoot := fmt.Sprintf("%s/%s", s.Root, pathKey.FullPath())
+	_, err := os.Stat(fullPathWithRoot)
 	if errors.Is(err, fs.ErrNotExist) {
 		return false
 	}
@@ -135,6 +136,10 @@ func (p PathKey) RemoveFolders() string {
 		return ""
 	}
 	return paths[0]
+}
+
+func (s *Store) Clear() error {
+	return os.RemoveAll(s.Root)
 }
 
 func (s *Store) Delete(key string) error {
