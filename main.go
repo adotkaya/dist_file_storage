@@ -3,6 +3,7 @@ package main
 import (
 	"dist_file_storage/p2p"
 	"log"
+	"time"
 )
 
 func main() {
@@ -18,10 +19,13 @@ func main() {
 		PathTransformFunc: CASPathTransformFunc,
 		Transport:         tcpTransport,
 	}
-	s := NewFileServer(fileServerOpts)
-	if err := s.Start(); err != nil {
+	fs := NewFileServer(fileServerOpts)
+	go func() {
+		time.Sleep(time.Second * 3)
+		fs.Quit()
+	}()
+	if err := fs.Start(); err != nil {
 		log.Fatal(err)
 	}
 
-	select {}
 }

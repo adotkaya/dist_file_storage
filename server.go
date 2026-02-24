@@ -1,6 +1,10 @@
 package main
 
-import "dist_file_storage/p2p"
+import (
+	"dist_file_storage/p2p"
+	"fmt"
+	"log"
+)
 
 type FileServerOpts struct {
 	ListenAddr        string
@@ -11,7 +15,9 @@ type FileServerOpts struct {
 
 type FileServer struct {
 	FileServerOpts
-	store *Store
+
+	store  *Store
+	quitch chan struct{}
 }
 
 func NewFileServer(opts FileServerOpts) *FileServer {
@@ -22,6 +28,7 @@ func NewFileServer(opts FileServerOpts) *FileServer {
 	return &FileServer{
 		FileServerOpts: opts,
 		store:          NewStore(storeOpts),
+		quitch:         make(chan struct{}),
 	}
 }
 
@@ -29,5 +36,27 @@ func (fs *FileServer) Start() error {
 	if err := fs.Transport.ListenAndAccept(); err != nil {
 		return err
 	}
+
+	fs.loop()
+
 	return nil
+}
+
+func (fs *FileServer) Quit() {
+	close(fs.quitch)
+}
+
+func (fs *FileServer) loop() {
+	defer func() {
+		log.Println("file server stopped due to user action")
+		fs.Transport.Close()
+	}()
+	for {
+		select {
+		case msg := <-fs.Transport.Consume():
+			fmt.Println(msg)
+		case <-fs.quitch:
+			return
+		}
+	}
 }
