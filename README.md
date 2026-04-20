@@ -1,21 +1,5 @@
 A **distributed file storage system** written in Go. It's in **early development** — the core building blocks (storage, P2P transport, server) are being implemented incrementally. Think of it as a nascent BitTorrent-like or IPFS-like system where nodes can store and retrieve files across a peer-to-peer network.
 ---
-## Directory Structure
-dist_file_storage/
-├── main.go              # Entry point
-├── server.go            # FileServer - orchestrates storage + transport
-├── storage.go           # Store - local disk storage with CAS hashing
-├── storage_test.go      # Tests for storage
-├── Makefile             # build, run, test targets
-├── go.mod / go.sum      # Go module (Go 1.25, only dependency: testify)
-└── p2p/                 # P2P networking layer
-    ├── transport.go     # Transport & Peer interfaces
-    ├── tcp_transport.go # TCP implementation
-    ├── tcp_transport_test.go
-    ├── message.go       # RPC message struct
-    ├── encoding.go      # Decoder interface (GOB + Default)
-    └── handshake.go     # HandshakeFunc type
----
 ## Core Components
 ### 1. Storage Layer (`storage.go`)
 **`Store`** — handles local file storage with Content-Addressable Storage (CAS):
