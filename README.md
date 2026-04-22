@@ -64,4 +64,4 @@ This is **Phase 1 / early scaffold**. Here's what's incomplete:
 make build   # builds to bin/fs
 make run     # builds and runs (auto-quits after 3s)
 make test    # runs all tests with verbose output
-Tests cover: CASPathTransformFunc hashing, Store write/read/delete lifecycle, and basic TCPTransport listening.
+Tests cover: CASPathTransformFunc hashing, Store write/read/delete lifecycle, and basic TCPTransport listening
