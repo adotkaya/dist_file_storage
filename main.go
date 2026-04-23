@@ -1,17 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"dist_file_storage/p2p"
 	"log"
 )
 
 func makeServer(listenaddr string, nodes ...string) *FileServer {
+
 	tcptransportOpts := p2p.TCPTransportOpts{
 		ListenAddr:    listenaddr,
 		HandshakeFunc: p2p.NOPHandshakeFunc,
 		Decoder:       p2p.DefaultDecoder{},
-		//TODO OnPeer:        OnPeer,
 	}
+
 	tcpTransport := p2p.NewTCPTransport(tcptransportOpts)
 	fileServerOpts := FileServerOpts{
 		StorageRoot:       listenaddr + "_network",
@@ -34,5 +36,9 @@ func main() {
 	}()
 
 	s2.Start()
+
+	data := bytes.NewReader([]byte("my big data file"))
+
+	s2.StoreData("myprivatedata", data)
 
 }
