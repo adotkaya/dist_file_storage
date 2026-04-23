@@ -4,6 +4,7 @@ import (
 	"dist_file_storage/p2p"
 	"fmt"
 	"log"
+	"sync"
 )
 
 type FileServerOpts struct {
@@ -17,8 +18,10 @@ type FileServerOpts struct {
 type FileServer struct {
 	FileServerOpts
 
-	store  *Store
-	quitch chan struct{}
+	peerLock sync.Mutex
+	peers    map[string]p2p.Peer
+	store    *Store
+	quitch   chan struct{}
 }
 
 func NewFileServer(opts FileServerOpts) *FileServer {
@@ -30,6 +33,7 @@ func NewFileServer(opts FileServerOpts) *FileServer {
 		FileServerOpts: opts,
 		store:          NewStore(storeOpts),
 		quitch:         make(chan struct{}),
+		peers:          make(map[string]p2p.Peer),
 	}
 }
 
@@ -41,6 +45,15 @@ func (fs *FileServer) Start() error {
 	fs.bootstrapNetwork()
 	fs.loop()
 
+	return nil
+}
+
+func (fs *FileServer) OnPeer(p p2p.Peer) error {
+	fs.peerLock.Lock()
+	defer fs.peerLock.Unlock()
+	fs.peers[p.RemoteAddr().String()] = p
+
+	log.Printf("connected with remote %s", p)
 	return nil
 }
 
