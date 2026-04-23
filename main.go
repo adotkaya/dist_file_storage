@@ -19,7 +19,10 @@ func makeServer(listenaddr string, nodes ...string) *FileServer {
 		Transport:         tcpTransport,
 		BootstrapNodes:    nodes,
 	}
-	return NewFileServer(fileServerOpts)
+
+	s := NewFileServer(fileServerOpts)
+	tcpTransport.OnPeer = s.OnPeer
+	return s
 }
 
 func main() {

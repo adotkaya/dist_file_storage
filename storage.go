@@ -15,6 +15,25 @@ import (
 
 const defaultRootFolderName = "defaultRoot"
 
+type PathTransformFunc func(string) PathKey
+
+type PathKey struct {
+	Pathname string
+	Filename string
+}
+
+func (p PathKey) FullPath() string {
+	return fmt.Sprintf("%s/%s", p.Pathname, p.Filename)
+}
+
+func (p PathKey) RemoveFolders() string {
+	paths := strings.Split(p.Pathname, "/")
+	if len(paths) == 0 {
+		return ""
+	}
+	return paths[0]
+}
+
 func CASPathTransformFunc(key string) PathKey {
 	hash := sha1.Sum([]byte(key)) // 20 bytes => slice
 	hashStr := hex.EncodeToString(hash[:])
@@ -39,17 +58,6 @@ var DefaultPathTransformFunc = func(key string) PathKey {
 		Filename: key,
 		Pathname: key,
 	}
-}
-
-type PathTransformFunc func(string) PathKey
-
-type PathKey struct {
-	Pathname string
-	Filename string
-}
-
-func (p PathKey) FullPath() string {
-	return fmt.Sprintf("%s/%s", p.Pathname, p.Filename)
 }
 
 type StoreOpts struct {
@@ -129,14 +137,6 @@ func (s *Store) writeStream(key string, r io.Reader) error {
 
 	log.Printf("written (%d) bytes to disk: %s", n, fullPathWithRoot)
 	return nil
-}
-
-func (p PathKey) RemoveFolders() string {
-	paths := strings.Split(p.Pathname, "/")
-	if len(paths) == 0 {
-		return ""
-	}
-	return paths[0]
 }
 
 func (s *Store) Clear() error {
