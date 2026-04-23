@@ -3,29 +3,33 @@ package main
 import (
 	"dist_file_storage/p2p"
 	"log"
-	"time"
 )
 
-func main() {
+func makeServer(listenaddr string, nodes ...string) *FileServer {
 	tcptransportOpts := p2p.TCPTransportOpts{
-		ListenAddr:    ":3000",
+		ListenAddr:    listenaddr,
 		HandshakeFunc: p2p.NOPHandshakeFunc,
 		Decoder:       p2p.DefaultDecoder{},
 		//TODO OnPeer:        OnPeer,
 	}
 	tcpTransport := p2p.NewTCPTransport(tcptransportOpts)
 	fileServerOpts := FileServerOpts{
-		StorageRoot:       "/tmp_network",
+		StorageRoot:       listenaddr + "_network",
 		PathTransformFunc: CASPathTransformFunc,
 		Transport:         tcpTransport,
+		BootstrapNodes:    nodes,
 	}
-	fs := NewFileServer(fileServerOpts)
+	return NewFileServer(fileServerOpts)
+}
+
+func main() {
+	s1 := makeServer(":3000", "")
+	s2 := makeServer(":4000", ":3000")
+
 	go func() {
-		time.Sleep(time.Second * 3)
-		fs.Quit()
+		log.Fatal(s1.Start())
 	}()
-	if err := fs.Start(); err != nil {
-		log.Fatal(err)
-	}
+
+	s2.Start()
 
 }
